@@ -10,3 +10,4 @@ DS_Store
 pyvenv.cfg
 .venv
 pip-selfcheck.json
+*.pyc
