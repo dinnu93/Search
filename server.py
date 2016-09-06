@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from search import postUrl
+import searchEngine
 import json
 
 app = Flask(__name__)
@@ -19,7 +19,7 @@ def url():
         content = request.get_json(silent=True)
         if 'url' in content:
             url = content['url']
-            if postUrl(url):
+            if searchEngine.postUrl(url):
                 return json.dumps({'url': url, 'indexed': True})
             else:
                 return json.dumps({'url': url,'indexed' : False, 'error' : 'Serialization error!'})

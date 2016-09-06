@@ -31,11 +31,15 @@ def postUrl(url):
         return True
     except exceptions.SerializationError:
         return False
-        
+
     
-def searchQuery(query):
-    es.indices.refresh(index=INDEX)
-    s = Search(using=es, index=INDEX).query("match", textRes=query)
-    response = s.execute()
-    for hit in response:
-        print(hit.meta.score, hit.urlRes)
+def searchQuery(queryText):
+    try:
+        es.indices.refresh(index=INDEX)
+        q = Q("match", textRes=queryText) | Q("prefix", textRes=queryText)
+        s = Search(using=es, index=INDEX).query(q)
+        response = s.execute()
+        for hit in response:
+            print(hit.meta.score, hit.urlRes)
+    except exceptions.NotFoundError:
+        print "Index named "+ INDEX + " doesn't exist!"
