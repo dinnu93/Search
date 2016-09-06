@@ -19,8 +19,10 @@ def url():
         content = request.get_json(silent=True)
         if 'url' in content:
             url = content['url']
-            postUrl(url)
-            return json.dumps({'url': url, 'indexed': True})
+            if postUrl(url):
+                return json.dumps({'url': url, 'indexed': True})
+            else:
+                return json.dumps({'url': url,'indexed' : False, 'error' : 'Serialization error!'})
         else:
             return json.dumps({'error': 'Not a valid request body!'})
         

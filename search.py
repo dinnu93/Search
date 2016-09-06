@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch, RequestsHttpConnection, serializer, compat, exceptions
+from elasticsearch_dsl import Search, Q
 from urllib2 import urlopen
 import json
 import os
@@ -15,14 +16,26 @@ class JSONSerializerPython2(serializer.JSONSerializer):
 
 es = Elasticsearch(serializer=JSONSerializerPython2())
 
+INDEX = "url"
+DOC_TYPE = "urlText"
+
 def postUrl(url):
     text = urlopen(url).read()
     doc_id = randint(1,10**20)
-    filepath = os.getcwd() + "/cache/" + str(doc_id) + ".htm"
-    es.index(index="url", doc_type="urlText", id = doc_id, body = {'urlRes' : url,'textRes' : text})
-    f = open(filepath, "w")
-    f.write(text)
-    f.close()
+    filepath = os.getcwd() + "/static/" + str(doc_id) + ".htm"
+    try:
+        es.index(index=INDEX, doc_type=DOC_TYPE, id = doc_id, body = {'urlRes' : url,'textRes' : text})
+        f = open(filepath, "w")
+        f.write(text)
+        f.close()
+        return True
+    except exceptions.SerializationError:
+        return False
+        
     
 def searchQuery(query):
-    pass
+    es.indices.refresh(index=INDEX)
+    s = Search(using=es, index=INDEX).query("match", textRes=query)
+    response = s.execute()
+    for hit in response:
+        print(hit.meta.score, hit.urlRes)
