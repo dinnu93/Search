@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-import searchEngine
+from searchEngine import *
 import json
 
 app = Flask(__name__)
@@ -9,9 +9,10 @@ PORT = 5000
 @app.route("/search")
 def search():
     query = request.args.get('q')
-    return json.dumps([{'urlResult' : 'http://google.com/',
-                        'textResult' : query,
-                        'cacheLink' : 'http://' + HOST + ':' + str(PORT) + '/static/temp.htm'}])
+    result_list = map(lambda x : {'textResult' : x[1],
+                                  'cacheLink' : 'http://' + HOST + ':' + str(PORT) + '/static/'+str(x[2])+'.htm',
+                                  'urlResult' : x[0]} , searchQuery(query))
+    return json.dumps(result_list)
 
 @app.route("/url", methods=['POST'])
 def url():
@@ -19,7 +20,7 @@ def url():
         content = request.get_json(silent=True)
         if 'url' in content:
             url = content['url']
-            if searchEngine.postUrl(url):
+            if postUrl(url):
                 return json.dumps({'url': url, 'indexed': True})
             else:
                 return json.dumps({'url': url,'indexed' : False, 'error' : 'Serialization error!'})

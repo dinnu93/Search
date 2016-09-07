@@ -4,6 +4,7 @@ from urllib2 import urlopen
 import json
 import os
 from random import randint
+from html2text import html2text
 
 class JSONSerializerPython2(serializer.JSONSerializer):
     def dumps(self, data):
@@ -37,9 +38,8 @@ def searchQuery(queryText):
     try:
         es.indices.refresh(index=INDEX)
         q = Q("match", textRes=queryText) | Q("prefix", textRes=queryText)
-        s = Search(using=es, index=INDEX).query(q)
+        s = Search(using=es, index=INDEX).query(q).highlight('textRes',pre_tags=[""],post_tags=[""],fragment_size=500, number_of_fragments=1)
         response = s.execute()
-        for hit in response:
-            print(hit.meta.score, hit.urlRes)
+        return (map(lambda hit: (hit.urlRes,hit.meta.highlight.textRes[0],hit.meta.id),response)) 
     except exceptions.NotFoundError:
         print "Index named "+ INDEX + " doesn't exist!"
