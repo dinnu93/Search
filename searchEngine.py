@@ -4,7 +4,6 @@ from urllib2 import urlopen
 import json
 import os
 from random import randint
-from html2text import html2text
 
 class JSONSerializerPython2(serializer.JSONSerializer):
     def dumps(self, data):
