@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from searchEngine import *
 import json
 import cgi
@@ -13,7 +13,7 @@ def search():
     result_list = map(lambda x : {'textResult' : cgi.escape(x[1]),
                                   'cacheLink' : 'http://' + HOST + ':' + str(PORT) + '/static/'+str(x[2])+'.htm',
                                   'urlResult' : x[0]} , searchQuery(query))
-    return json.dumps(result_list)
+    return Response(json.dumps(result_list, indent=4), mimetype='application/json')
 
 @app.route("/url", methods=['POST'])
 def url():
@@ -22,11 +22,12 @@ def url():
         if 'url' in content:
             url = content['url']
             if postUrl(url):
-                return json.dumps({'url': url, 'indexed': True})
+                return Response(json.dumps({'url': url, 'indexed': True}, indent=4), mimetype='application/json')
             else:
-                return json.dumps({'url': url,'indexed' : False, 'error' : 'Serialization error!'})
+                return Response(json.dumps({'url': url,'indexed' : False,
+                                            'error' : 'Serialization error!'}, indent=4), mimetype='application/json') 
         else:
-            return json.dumps({'error': 'Not a valid request body!'})
+            return Response(json.dumps({'error': 'Not a valid request body!'}, indent=4), mimetype='application/json')
         
 if __name__=="__main__":
     app.run(host=HOST, port=PORT, debug=True)
