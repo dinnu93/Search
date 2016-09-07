@@ -1,15 +1,16 @@
 from flask import Flask, jsonify, request
 from searchEngine import *
 import json
+import cgi
 
 app = Flask(__name__)
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 PORT = 5000
 
 @app.route("/search")
 def search():
     query = request.args.get('q')
-    result_list = map(lambda x : {'textResult' : x[1],
+    result_list = map(lambda x : {'textResult' : cgi.escape(x[1]),
                                   'cacheLink' : 'http://' + HOST + ':' + str(PORT) + '/static/'+str(x[2])+'.htm',
                                   'urlResult' : x[0]} , searchQuery(query))
     return json.dumps(result_list)
