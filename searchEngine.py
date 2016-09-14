@@ -37,8 +37,8 @@ def searchQuery(queryText):
     try:
         es.indices.refresh(index=INDEX)
         q = Q("match", textRes=queryText) | Q("prefix", textRes=queryText)
-        s = Search(using=es, index=INDEX).query(q).highlight('textRes',pre_tags=[""],post_tags=[""],fragment_size=500, number_of_fragments=1)
+        s = Search(using=es, index=INDEX).query(q).highlight('textRes',pre_tags=[""],post_tags=[""],fragment_size=500)
         response = s.execute()
-        return (map(lambda hit: (hit.urlRes,hit.meta.highlight.textRes[0],hit.meta.id),response)) 
+        return (map(lambda hit: (hit.urlRes,hit.meta.highlight.textRes,hit.meta.id),response))
     except exceptions.NotFoundError:
         return [] 

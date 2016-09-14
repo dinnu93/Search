@@ -9,7 +9,7 @@ HOST = '139.59.26.210'
 @app.route("/search")
 def search():
     query = request.args.get('q')
-    result_list = map(lambda x : {'textResult' : cgi.escape(x[1]),
+    result_list = map(lambda x :{'textResults': map(lambda s : s.encode('utf-8').decode('unicode_escape').encode('ascii','ignore') , list(x[1])),
                                   'cacheLink' : 'http://' + HOST + url_for('static', filename = str(x[2])+'.html'),
                                   'urlResult' : x[0]} , searchQuery(query))
     return Response(json.dumps(result_list, indent=4), mimetype='application/json')
